@@ -1,0 +1,12 @@
+{
+    "extensions":{
+        "modules/html-difference":{
+            "version": "1.0.0",
+            "exec":"python html_difference.py",
+            "source":"https://grid.gridle.com/gridle/html_diff",
+            "params":[
+                
+            ]
+        }
+    }
+}

@@ -1,4 +1,4 @@
-package encrypt
+package sha1_encode
 
 import (
 	"crypto/sha1"
@@ -24,10 +24,10 @@ func ShaFile(filePath string) []byte { // get the SHA-1 value of hash value of a
 	return h.Sum(nil)
 }
 
-func ShaFile2() []byte { // get the SHA-1 value of hash value of a file
+func ShaText(content string) []byte { // get the SHA-1 value of hash value of a file
 
 	h := sha1.New()
 
-	io.WriteString(h, "Submit : 2022-12-06 10:44:10")
+	io.WriteString(h, content)
 	return h.Sum(nil)
 }

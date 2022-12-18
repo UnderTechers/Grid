@@ -1,4 +1,4 @@
-package encrypt
+package sha1_encode
 
 import (
 	"log"
