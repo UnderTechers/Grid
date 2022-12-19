@@ -19,7 +19,7 @@ var (
 )
 
 type Router struct {
-	host string
+	Host string
 }
 
 func iferr(err error) { //grammar sugar for error detection
@@ -59,6 +59,6 @@ func sync(c *gin.Context) { //POST
 func (s Router) Init_Server() {
 	r := gin.New()
 
-	defer r.Run(s.host)
+	defer r.Run(s.Host)
 
 }

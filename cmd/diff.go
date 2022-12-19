@@ -7,8 +7,14 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )
+
+var diffCommand = &cobra.Command{
+	Use:   "diff",
+	Short: "To compare 2 different files by their sha-1 code or using extensions in Grid",
+}
 
 type Diff struct {
 }

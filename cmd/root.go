@@ -17,11 +17,14 @@ var rootCmd = &cobra.Command{
 var echoTimes int
 
 func Execute() {
+	flags()
 	cmdPrint.Flags().IntVarP(&echoTimes, "times", "", 1, "times to echo the input")
 	rootCmd.AddCommand(Init)
 	cmdPrint.AddCommand(cmdPrint2)
 	rootCmd.AddCommand(cmdPrint)
 	rootCmd.AddCommand(sync)
+	rootCmd.AddCommand(add)
+	rootCmd.AddCommand(listen)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
