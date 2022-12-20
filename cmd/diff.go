@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/hex"
+	"fmt"
 	"grid/sha1_encode"
 	"io/ioutil"
 	"os"
@@ -12,7 +13,7 @@ import (
 )
 
 var diffCommand = &cobra.Command{
-	Use:   "diff",
+	Use:   "diff [file1] [file2]",
 	Short: "To compare 2 different files by their sha-1 code or using extensions in Grid",
 }
 
@@ -46,6 +47,20 @@ func (d Diff) Get_latest_filePath(filePath string) string {
 	return ret
 }
 
+func GetFiles(folder string) []string {
+	files, _ := ioutil.ReadDir(folder)
+	var result []string
+	for _, file := range files {
+		if file.IsDir() {
+			result = append(result)
+
+		} else {
+			fmt.Println(folder + "/" + file.Name())
+		}
+	}
+
+}
+
 func (d Diff) If_Diff_Files(filepath1 string, filepath2 string) bool {
 	sha1_code := hex.EncodeToString(sha1_encode.ShaFile(filepath1))
 	sha2_code := hex.EncodeToString(sha1_encode.ShaFile(filepath2))
@@ -54,4 +69,8 @@ func (d Diff) If_Diff_Files(filepath1 string, filepath2 string) bool {
 	} else {
 		return true
 	}
+}
+
+func (d Diff) Show_Changes() {
+
 }

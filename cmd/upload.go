@@ -9,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 // type submitHistory struct {
@@ -36,12 +37,13 @@ func iferr(err error) {
 	}
 }
 
-func checkSync() bool { //check if upload needed
+func getLatestBranchStatus() (string, bool, string) {
 	dataJson, err := ioutil.ReadFile("/.grid/config.json")
 	iferr(err)
-	latest := gjson.Get(string(dataJson), "latest")
-	fmt.Println(latest)
-	return false
+	latest := gjson.Get(string(dataJson), "latest").String()
+	ifSync := gjson.Get(string(dataJson), "ifsync").Bool()
+
+	return latest, ifSync, string(dataJson)
 }
 
 var add = &cobra.Command{
@@ -51,7 +53,12 @@ var add = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var filepath = args[0]
-		checkSync()
+		latest, ifSync, dataJson := getLatestBranchStatus()
+		if ifSync == false { // if this is a new submit
+			dataJson, _ = sjson.Set(dataJson, "ifsync", "true")
+			//create submit folder and corresponding json
+
+		}
 		fmt.Println(filepath)
 	},
 }
@@ -64,6 +71,14 @@ var submit = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var title = args[0]
 		var content = args[1]
+
+		latest, ifSync, dataJson := getLatestBranchStatus()
+
+		if ifSync == false {
+			// error : because you cannot submit multiple times
+			fmt.Println("- Error [101]: you cannot submit multiple times. Please check you have synced before you submit. ")
+		}
+		fmt.Println(latest)
 
 	},
 }
