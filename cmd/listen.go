@@ -6,6 +6,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	rootCmd.AddCommand(listen)
+	listen.Flags().StringVarP(&port, "port", "p", "0.0.0.0", "Port set to be listened")
+}
+
 var port string
 
 var listen = &cobra.Command{

@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"bufio"
 	"encoding/hex"
 	"fmt"
 	"grid/sha1_encode"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
@@ -15,6 +17,10 @@ import (
 var diffCommand = &cobra.Command{
 	Use:   "diff [file1] [file2]",
 	Short: "To compare 2 different files by their sha-1 code or using extensions in Grid",
+}
+
+func init() {
+	rootCmd.AddCommand(diffCommand)
 }
 
 type Diff struct {
@@ -71,6 +77,45 @@ func (d Diff) If_Diff_Files(filepath1 string, filepath2 string) bool {
 	}
 }
 
-func (d Diff) Show_Changes() {
+//利用正则表达式压缩字符串，去除空格或制表符
+func strip(str string) string {
+	if str == "" {
+		return ""
+	}
+	//匹配一个或多个空白符的正则表达式
+	reg := regexp.MustCompile("\\s+")
+	return reg.ReplaceAllString(str, "")
+}
+
+func (d Diff) Show_Changes(preCodePath string, postCodePath string) {
+	// show the changes line by line
+	preCode, err := os.Open(preCodePath)
+	iferr(err)
+	postCode, err := os.Open(postCodePath)
+	iferr(err)
+	defer preCode.Close()
+	defer postCode.Close()
+
+	scanner1 := bufio.NewScanner(preCode)
+	scanner2 := bufio.NewScanner(postCode)
+
+	for scanner1.Scan() && scanner2.Scan() {
+		line1 := strip(scanner1.Text())
+		line2 := strip(scanner2.Text())
+		if line1 == "" && line2 != "" {
+			// new
+		}
+		if line1 != "" && line2 == "" {
+			//delete
+		}
+		if line1 == line2 {
+			continue
+		}
+
+		if line1 != line2 {
+			//changed
+		}
+
+	}
 
 }

@@ -77,6 +77,7 @@ var submit = &cobra.Command{
 		if ifSync == false {
 			// error : because you cannot submit multiple times
 			fmt.Println("- Error [101]: you cannot submit multiple times. Please check you have synced before you submit. ")
+			return
 		}
 		fmt.Println(latest)
 
