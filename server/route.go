@@ -18,6 +18,10 @@ var (
 	}
 )
 
+func init() {
+
+}
+
 type Router struct {
 	Host string
 }
@@ -56,9 +60,17 @@ func sync(c *gin.Context) { //POST
 	}
 
 }
-func (s Router) Init_Server() {
+func (s *Router) Init_Server() {
 	r := gin.New()
 
 	defer r.Run(s.Host)
+
+}
+
+func (s Router) Routes() {
+
+}
+
+func (s Router) Download() {
 
 }
