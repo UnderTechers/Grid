@@ -54,6 +54,7 @@ var add = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var filepath = args[0]
 		latest, ifSync, dataJson := getLatestBranchStatus()
+		fmt.Println(latest)
 		if ifSync == false { // if this is a new submit
 			dataJson, _ = sjson.Set(dataJson, "ifsync", "true")
 			//create submit folder and corresponding json
@@ -71,9 +72,8 @@ var submit = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var title = args[0]
 		var content = args[1]
-
 		latest, ifSync, dataJson := getLatestBranchStatus()
-
+		fmt.Println(title, content, dataJson)
 		if ifSync == false {
 			// error : because you cannot submit multiple times
 			fmt.Println("- Error [101]: you cannot submit multiple times. Please check you have synced before you submit. ")

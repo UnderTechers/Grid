@@ -64,7 +64,7 @@ func GetFiles(folder string) []string {
 			fmt.Println(folder + "/" + file.Name())
 		}
 	}
-
+	return result
 }
 
 func (d Diff) If_Diff_Files(filepath1 string, filepath2 string) bool {
@@ -77,7 +77,7 @@ func (d Diff) If_Diff_Files(filepath1 string, filepath2 string) bool {
 	}
 }
 
-//利用正则表达式压缩字符串，去除空格或制表符
+// 利用正则表达式压缩字符串，去除空格或制表符
 func strip(str string) string {
 	if str == "" {
 		return ""
