@@ -24,7 +24,7 @@ var download = &cobra.Command{
 }
 
 func init() {
-
+	rootCmd.AddCommand(download)
 }
 func DownloadFile(link string) {
 	u, err := url.Parse(link)

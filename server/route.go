@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tidwall/gjson"
 )
 
 var (
@@ -24,6 +25,7 @@ func init() {
 
 type Router struct {
 	Host string
+	r    *gin.Engine
 }
 
 func iferr(err error) { //grammar sugar for error detection
@@ -61,14 +63,34 @@ func sync(c *gin.Context) { //POST
 
 }
 func (s *Router) Init_Server() {
-	r := gin.New()
-
-	defer r.Run(s.Host)
+	s.r = gin.New()
+	defer s.r.Run(s.Host)
+	s.Routes()
 
 }
 
 func (s Router) Routes() {
+	s.r.POST("/proj/:username/:projectname", func(c *gin.Context) {
+		userName := c.Param("username")
+		projectName := c.Param("projectname")
+		dir := "./.grid_server/" + userName + "/" + projectName + "/"
+		// -- get default branch //
 
+		f, _ := ioutil.ReadFile(dir + "config.json")
+		_default := gjson.Get(string(f), "default").String()
+
+		//latest submit
+		g, _ := ioutil.ReadFile(dir + _default + "/config.json")
+		_latest := gjson.Get(string(g), "latest").String()
+
+		// compress
+		var compress Compression
+		compress.Compress(dir+_default+"/"+_latest, dir+_default+"/"+_latest+".7z")
+		// about compression: it would be moved when every submit updated
+
+		// send file
+		c.File(dir + _default + "/" + _latest + ".7z")
+	})
 }
 
 func (s Router) Download() {

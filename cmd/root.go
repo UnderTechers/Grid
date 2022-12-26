@@ -17,7 +17,7 @@ var rootCmd = &cobra.Command{
 var echoTimes int
 
 func Execute() {
-	flags()
+
 	cmdPrint.Flags().IntVarP(&echoTimes, "times", "", 1, "times to echo the input")
 	rootCmd.AddCommand(Init)
 	cmdPrint.AddCommand(cmdPrint2)

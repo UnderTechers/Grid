@@ -1,7 +1,7 @@
 package main
 
 import (
-	"grid/server"
+	"grid/cmd"
 	"os"
 )
 
@@ -19,9 +19,9 @@ func main() {
 	// encrypt.Testify()
 	// fmt.Println(hex.EncodeToString(encrypt.ShaFile2()))
 
-	var c server.Compression
-	c.Compress("hello", "something.7z")
-	//cmd.Execute()
+	// var c server.Compression
+	// c.Compress("hello", "something.7z")
+	cmd.Execute()
 	// var r server.Router
 	// r.Host = "0.0.0.0:8000"
 	// r.Init_Server()
