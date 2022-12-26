@@ -71,21 +71,23 @@ func (s *Router) Init_Server() {
 
 func (s Router) Routes() {
 	s.r.POST("/proj/:username/:projectname", func(c *gin.Context) {
+		fmt.Println("succeeded")
 		userName := c.Param("username")
 		projectName := c.Param("projectname")
 		dir := "./.grid_server/" + userName + "/" + projectName + "/"
 		// -- get default branch //
 
 		f, _ := ioutil.ReadFile(dir + "config.json")
-		_default := gjson.Get(string(f), "default").String()
+		_default := gjson.Get(string(f), "defaultBranch").String()
 
 		//latest submit
-		g, _ := ioutil.ReadFile(dir + _default + "/config.json")
+		g, _ := ioutil.ReadFile(dir + _default + "/history.json")
 		_latest := gjson.Get(string(g), "latest").String()
 
+		fmt.Println()
 		// compress
 		var compress Compression
-		compress.Compress(dir+_default+"/"+_latest, dir+_default+"/"+_latest+".7z")
+		compress.Compress(dir+_default+"/"+_latest+"/file/", dir+_default+"/"+_latest+".7z")
 		// about compression: it would be moved when every submit updated
 
 		// send file

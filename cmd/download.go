@@ -33,8 +33,9 @@ func DownloadFile(link string) {
 	dirName := dirNameSeq[len(dirNameSeq)-1]
 	fmt.Println(dirName)
 
-	req, _ := http.NewRequest("GET", link, nil)
+	req, err := http.NewRequest("POST", link, nil)
 	resp, _ := http.DefaultClient.Do(req)
+	iferr(err)
 	defer resp.Body.Close()
 
 	f, _ := os.OpenFile(dirName+".7z", os.O_CREATE|os.O_WRONLY, 0644)
