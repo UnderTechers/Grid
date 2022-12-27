@@ -84,10 +84,10 @@ func (s Router) Routes() {
 		g, _ := ioutil.ReadFile(dir + _default + "/history.json")
 		_latest := gjson.Get(string(g), "latest").String()
 
-		fmt.Println()
+		fmt.Println(dir + _default + "/" + _latest + ".7z")
 		// compress
 		var compress Compression
-		compress.Compress(dir+_default+"/"+_latest+"/file/", dir+_default+"/"+_latest+".7z")
+		compress.Compress(dir+_default+"/"+_latest+"/files/", dir+_default+"/"+_latest+".7z")
 		// about compression: it would be moved when every submit updated
 
 		// send file

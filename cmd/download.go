@@ -27,8 +27,12 @@ func init() {
 	rootCmd.AddCommand(download)
 }
 func DownloadFile(link string) {
+	if strings.HasPrefix(link, "http://") != true && strings.HasPrefix(link, "https://") != true {
+		link = "http://" + link
+	}
 	u, err := url.Parse(link)
 	iferr(err)
+
 	dirNameSeq := strings.Split(u.Path, "/")
 	dirName := dirNameSeq[len(dirNameSeq)-1]
 	fmt.Println(dirName)
