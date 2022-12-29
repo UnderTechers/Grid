@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"grid/sha1_encode"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -25,6 +26,11 @@ import (
 // 	contributors   []string `json:"contributors"`
 // 	source         string   `json:"source"`
 // }
+
+type changesInFile struct {
+	hashcode string
+	_type    string
+}
 
 var (
 	hostPrefix = "127.0.0.1:8080/internal"
@@ -86,39 +92,63 @@ var add = &cobra.Command{
 	Long:  "Add takes charge of upload files into one submit.",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		var originalFilePath = args[0]
-		dataJson, err := ioutil.ReadFile("/.grid/config.json")
-		iferr(err)
-		latest := gjson.Get(string(dataJson), "latest").String()
-		ifSync := gjson.Get(string(dataJson), "ifsync").Bool()
-		username := gjson.Get(string(dataJson), "username").String()
-		branchName := gjson.Get(string(dataJson), "banrchName").String()
+		var filename = args[0]
 
-		// initialize tmp
-		if ifSync == false { // if this is a new submit
-			sjson.Set(string(dataJson), "ifsync", "true")
-			res, _ := PathExists("./.grid/tmp/")
-			if res { // if exists
-				os.RemoveAll("./.grid/tmp/")
-				createDir("./.grid/tmp/")
+		if filename == "." {
+
+		} else {
+			var originalFilePath = filename
+			dataJson, err := ioutil.ReadFile("/.grid/config.json")
+			iferr(err)
+			latest := gjson.Get(string(dataJson), "latest").String()
+			ifSync := gjson.Get(string(dataJson), "ifsync").Bool()
+			username := gjson.Get(string(dataJson), "username").String()
+			branchName := gjson.Get(string(dataJson), "banrchName").String()
+			tmpConfigPath := "./.grid/tmp/config.json"
+			// initialize tmp
+			if ifSync == false { // if this is a new submit
+				sjson.Set(string(dataJson), "ifsync", "true")
+				res, _ := PathExists("./.grid/tmp/")
+				if res { // if exists
+					os.RemoveAll("./.grid/tmp/")
+					createDir("./.grid/tmp/")
+				}
+
+				createFile(tmpConfigPath)
+				writeFile(tmpConfigPath, "{}")
 			}
 
-			createFile("./.grid/tmp/config.json")
-			writeFile("./.grid/tmp/config.json", "{}")
+			var targetedFilePath = path.Join(".", ".grid", username, branchName, latest, "file", originalFilePath)
+			var d Diff
+			_type := "normal"
+			changes := make(map[string][]int)
+			status := "changed"
+			Config, err := ioutil.ReadFile(tmpConfigPath)
+			commitConfig := string(Config)
+			if res, _ := PathExists(targetedFilePath); !res {
+				status = "add"
+			}
+			if d.If_Diff_Files(originalFilePath, targetedFilePath) {
+				fileInfo := gjson.Get(commitConfig, originalFilePath).String() //json result
+
+				hashcode := sha1_encode.ShaFile(originalFilePath)
+
+				changes["addition"] = append(changes["addition"])
+				// check if it exists
+				if fileInfo == "" {
+					content := make(map[string]string)
+					content["hashcode"] = hashcode
+					content["type"] = _type
+					content["status"] = status
+					sjson.Set(commitConfig, originalFilePath, content)
+				}
+			}
+			fmt.Println(latest)
+
+			//write back
+			writeFile(tmpConfigPath, commitConfig)
+			//compare
 		}
-
-		var targetedFilePath = path.Join(".", ".grid", username, branchName, latest, "file", originalFilePath)
-		var d Diff
-
-		Config, err := ioutil.ReadFile("./.grid/tmp/config.json")
-		commitConfig := string(Config)
-		if d.If_Diff_Files(originalFilePath, targetedFilePath) {
-			fileInfo := gjson.Get(commitConfig, originalFilePath) //json result
-
-		}
-		fmt.Println(latest)
-
-		//compare
 
 	},
 }
