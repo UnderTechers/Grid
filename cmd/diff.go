@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bufio"
-	"encoding/hex"
 	"fmt"
 	"grid/sha1_encode"
 	"io/ioutil"
@@ -17,6 +16,16 @@ import (
 var diffCommand = &cobra.Command{
 	Use:   "diff [file1] [file2]",
 	Short: "To compare 2 different files by their sha-1 code or using extensions in Grid",
+	Args:  cobra.MinimumNArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		var d Diff
+		if !d.If_Diff_Files(args[0], args[1]) {
+			fmt.Println("same")
+		} else {
+			fmt.Println("different")
+		}
+
+	},
 }
 
 func init() {
@@ -68,8 +77,8 @@ func GetFiles(folder string) []string {
 }
 
 func (d Diff) If_Diff_Files(filepath1 string, filepath2 string) bool {
-	sha1_code := hex.EncodeToString(sha1_encode.ShaFile(filepath1))
-	sha2_code := hex.EncodeToString(sha1_encode.ShaFile(filepath2))
+	sha1_code := sha1_encode.ShaFile(filepath1)
+	sha2_code := (sha1_encode.ShaFile(filepath2))
 	if sha1_code == sha2_code {
 		return false
 	} else {

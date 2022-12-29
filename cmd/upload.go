@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"path"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -46,21 +48,78 @@ func getLatestBranchStatus() (string, bool, string) {
 	return latest, ifSync, string(dataJson)
 }
 
+func compare2Files(file1 string, file2 string) bool { // true means different and vice versa
+	return false
+}
+
+func createFile(filename string) {
+
+	// del file
+	os.Remove(filename)
+	newFile, err := os.Create(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer newFile.Close()
+}
+
+func createDir(filename string) {
+
+	newpath := filename
+	err := os.MkdirAll(newpath, os.ModePerm)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func writeFile(filename string, content string) {
+	err := ioutil.WriteFile(filename, []byte(content), 0666)
+	if err != nil {
+		log.Print(err)
+	}
+}
+
 var add = &cobra.Command{
 	Use:   "add [the filename that will be submitted]",
 	Short: "Add takes charge of upload files into one submit.",
 	Long:  "Add takes charge of upload files into one submit.",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		var filepath = args[0]
-		latest, ifSync, dataJson := getLatestBranchStatus()
-		fmt.Println(latest)
+		var originalFilePath = args[0]
+		dataJson, err := ioutil.ReadFile("/.grid/config.json")
+		iferr(err)
+		latest := gjson.Get(string(dataJson), "latest").String()
+		ifSync := gjson.Get(string(dataJson), "ifsync").Bool()
+		username := gjson.Get(string(dataJson), "username").String()
+		branchName := gjson.Get(string(dataJson), "banrchName").String()
+
+		// initialize tmp
 		if ifSync == false { // if this is a new submit
-			dataJson, _ = sjson.Set(dataJson, "ifsync", "true")
-			//create submit folder and corresponding json
+			sjson.Set(string(dataJson), "ifsync", "true")
+			res, _ := PathExists("./.grid/tmp/")
+			if res { // if exists
+				os.RemoveAll("./.grid/tmp/")
+				createDir("./.grid/tmp/")
+			}
+
+			createFile("./.grid/tmp/config.json")
+			writeFile("./.grid/tmp/config.json", "{}")
+		}
+
+		var targetedFilePath = path.Join(".", ".grid", username, branchName, latest, "file", originalFilePath)
+		var d Diff
+
+		Config, err := ioutil.ReadFile("./.grid/tmp/config.json")
+		commitConfig := string(Config)
+		if d.If_Diff_Files(originalFilePath, targetedFilePath) {
+			fileInfo := gjson.Get(commitConfig, originalFilePath) //json result
 
 		}
-		fmt.Println(filepath)
+		fmt.Println(latest)
+
+		//compare
+
 	},
 }
 
