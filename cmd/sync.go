@@ -3,12 +3,14 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 )
 
 func DefaultBytes(maxBytes int64, description ...string) *progressbar.ProgressBar {
@@ -52,13 +54,22 @@ func downloadExample() {
 
 }
 
-var sync = &cobra.Command{
+var _sync = &cobra.Command{
 	Use:   "sync",
 	Short: "sync will make your submits synchronize with the server",
 
 	Long: "If you want to synchrnoize the server because of new changes there, you can use sync. If you want to submit your changes, you can use sync.",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("- sync starts!")
-		downloadExample()
+		fmt.Println("- detecting conflicts...")
+		dataJson, err := ioutil.ReadFile("/.grid/config.json")
+		iferr(err)
+		ifsync := gjson.Get(string(dataJson), "ifsync").Bool()
+		if ifsync {
+			//upload
+
+		} else {
+			//download
+		}
 	},
 }

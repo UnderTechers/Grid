@@ -8,5 +8,7 @@
             "deletion":[1,2,3],
             "modification":[9,10]
         }
-    }
+    },
+    "title":"",
+    "description":""
 }

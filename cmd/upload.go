@@ -90,7 +90,7 @@ func createFile(filename string) {
 }
 
 func createDir(filename string) {
-
+	os.RemoveAll(filename)
 	newpath := filename
 	err := os.MkdirAll(newpath, os.ModePerm)
 
@@ -208,9 +208,9 @@ var submit = &cobra.Command{
 		iferr(err)
 		dataJson := string(data)
 		defaultBranch := gjson.Get(dataJson, "branchName").String()
-		username := gjson.Get(dataJson, "username").String()
-		submit_token := gjson.Get(dataJson, "submit_token").String()
-		latestSubmit := gjson.Get(dataJson, "latest").String()
+		// username := gjson.Get(dataJson, "username").String()
+		// submit_token := gjson.Get(dataJson, "submit_token").String()
+		// latestSubmit := gjson.Get(dataJson, "latest").String()
 		ifSync := gjson.Get(dataJson, "ifsync").Bool()
 
 		fmt.Println(title, content, dataJson)
@@ -246,7 +246,7 @@ var submit = &cobra.Command{
 				}
 			}
 
-			fmt.Println("(%d) files added, (%d) files changed, (%d) files deleted", addition, modification, deletion)
+			fmt.Println("- (%d) files added, (%d) files changed, (%d) files deleted", addition, modification, deletion)
 			//create a submit
 
 			submitHashCode := sha1_encode.ShaText(string(stagingArea))
@@ -257,6 +257,8 @@ var submit = &cobra.Command{
 			//update latest submit
 			sjson.Set(dataJson, "latest", submitHashCode)
 			writeFile("./.grid/config.json", dataJson)
+
+			fmt.Println("- submit has been created! The SHA-1 code is: %s", submitHashCode)
 		}
 
 	},

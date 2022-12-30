@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"grid/server"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
@@ -51,5 +53,14 @@ func DownloadFile(link string) {
 		"- ",
 	)
 	io.Copy(io.MultiWriter(f, bar), resp.Body)
+
+	var c server.Compression
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go c.Decompress("./"+dirName+".7z", wg.Done)
+	wg.Wait()
+
+	err = os.Rename("./files", "./"+dirName)
+	iferr(err)
 
 }

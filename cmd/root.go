@@ -22,7 +22,7 @@ func Execute() {
 	rootCmd.AddCommand(Init)
 	cmdPrint.AddCommand(cmdPrint2)
 	rootCmd.AddCommand(cmdPrint)
-	rootCmd.AddCommand(sync)
+	rootCmd.AddCommand(_sync)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

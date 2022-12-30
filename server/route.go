@@ -70,31 +70,38 @@ func (s *Router) Init_Server() {
 }
 
 func (s Router) Routes() {
-	s.r.POST("/proj/:username/:projectname", func(c *gin.Context) {
-		fmt.Println("succeeded")
-		userName := c.Param("username")
-		projectName := c.Param("projectname")
-		dir := "./.grid_server/" + userName + "/" + projectName + "/"
-		// -- get default branch //
+	s.r.POST("/proj/:username/:projectname", s.Download)
+	s.r.POST("/sync", func(c *gin.Context) {
+		// username, token(for authorize)
+		// upload the 7z of project and then unzip it here
+		// creating a new submit here and then save everything
+		// and then updating the config.json in .grid_server
+		// after done, send back the response of being successful
 
-		f, _ := ioutil.ReadFile(dir + "config.json")
-		_default := gjson.Get(string(f), "defaultBranch").String()
-
-		//latest submit
-		g, _ := ioutil.ReadFile(dir + _default + "/history.json")
-		_latest := gjson.Get(string(g), "latest").String()
-
-		fmt.Println(dir + _default + "/" + _latest + ".7z")
-		// compress
-		var compress Compression
-		compress.Compress(dir+_default+"/"+_latest+"/files/", dir+_default+"/"+_latest+".7z")
-		// about compression: it would be moved when every submit updated
-
-		// send file
-		c.File(dir + _default + "/" + _latest + ".7z")
 	})
 }
 
-func (s Router) Download() {
+func (s Router) Download(c *gin.Context) {
+	fmt.Println("succeeded")
+	userName := c.Param("username")
+	projectName := c.Param("projectname")
+	dir := "./.grid_server/" + userName + "/" + projectName + "/"
+	// -- get default branch //
+
+	f, _ := ioutil.ReadFile(dir + "config.json")
+	_default := gjson.Get(string(f), "defaultBranch").String()
+
+	//latest submit
+	g, _ := ioutil.ReadFile(dir + _default + "/history.json")
+	_latest := gjson.Get(string(g), "latest").String()
+
+	fmt.Println(dir + _default + "/" + _latest + ".7z")
+	// compress
+	var compress Compression
+	compress.Compress(dir+_default+"/"+_latest+"/files/", dir+_default+"/"+_latest+".7z")
+	// about compression: it would be moved when every submit updated
+
+	// send file
+	c.File(dir + _default + "/" + _latest + ".7z")
 
 }
