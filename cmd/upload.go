@@ -45,6 +45,21 @@ func iferr(err error) {
 	}
 }
 
+func GetFiles(folder string) []string {
+
+	files, _ := ioutil.ReadDir(folder)
+	var ret []string
+	for _, file := range files {
+		if file.IsDir() {
+			ret = append(ret, GetFiles(folder+"/"+file.Name())...)
+		} else {
+			ret = append(ret, (folder + "/" + file.Name()))
+		}
+	}
+	return ret
+
+}
+
 func getLatestBranchStatus() (string, bool, string) {
 	dataJson, err := ioutil.ReadFile("/.grid/config.json")
 	iferr(err)
@@ -104,7 +119,7 @@ var add = &cobra.Command{
 			ifSync := gjson.Get(string(dataJson), "ifsync").Bool()
 			username := gjson.Get(string(dataJson), "username").String()
 			branchName := gjson.Get(string(dataJson), "banrchName").String()
-			tmpConfigPath := "./.grid/tmp/config.json"
+			tmpConfigPath := "./.grid/tmp/stagingArea.json"
 			// initialize tmp
 			if ifSync == false { // if this is a new submit
 				sjson.Set(string(dataJson), "ifsync", "true")
@@ -118,20 +133,33 @@ var add = &cobra.Command{
 				writeFile(tmpConfigPath, "{}")
 			}
 
-			var targetedFilePath = path.Join(".", ".grid", username, branchName, latest, "file", originalFilePath)
+			var targetedFilePath = path.Join(".", ".grid", username, branchName, latest, "files", originalFilePath)
 			var d Diff
 			_type := "normal"
+			hashcode := sha1_encode.ShaFile(originalFilePath)
 			changes := make(map[string][]int)
 			status := "changed"
 			Config, err := ioutil.ReadFile(tmpConfigPath)
 			commitConfig := string(Config)
 			if res, _ := PathExists(targetedFilePath); !res {
 				status = "add"
+				content := make(map[string]string)
+				content["hashcode"] = hashcode
+				content["type"] = _type
+				content["status"] = status
+				sjson.Set(commitConfig, originalFilePath, content)
+				writeFile(tmpConfigPath, commitConfig)
+				return
 			}
 			if d.If_Diff_Files(originalFilePath, targetedFilePath) {
-				fileInfo := gjson.Get(commitConfig, originalFilePath).String() //json result
-
-				hashcode := sha1_encode.ShaFile(originalFilePath)
+				//check if exists
+				value := gjson.Get(commitConfig, originalFilePath)
+				if !value.Exists() {
+					//error
+					fmt.Println("- Error[102] : There is no file in given directory")
+					return
+				}
+				fileInfo := value.String() //json result
 
 				changes["addition"] = append(changes["addition"])
 				// check if it exists
@@ -141,12 +169,12 @@ var add = &cobra.Command{
 					content["type"] = _type
 					content["status"] = status
 					sjson.Set(commitConfig, originalFilePath, content)
+					writeFile(tmpConfigPath, commitConfig)
+					return
 				}
 			}
-			fmt.Println(latest)
 
 			//write back
-			writeFile(tmpConfigPath, commitConfig)
 			//compare
 		}
 
@@ -167,7 +195,17 @@ var submit = &cobra.Command{
 			// error : because you cannot submit multiple times
 			fmt.Println("- Error [101]: you cannot submit multiple times. Please check you have synced before you submit. ")
 			return
+		} else {
+			submitHashCode := sha1_encode.ShaFile("./.grid/tmp/stagingArea.json")
+			stagingArea, err := ioutil.ReadFile("./.grid/tmp/stagingArea.json")
+			if err != nil {
+				log.Fatalln(err)
+			}
+			fileList := GetFiles("./.grid/tmp")
+			fmt.Println(submitHashCode, stagingArea, fileList)
 		}
+
+		//create a submit
 		fmt.Println(latest)
 
 	},

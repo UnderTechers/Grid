@@ -62,20 +62,6 @@ func (d Diff) Get_latest_filePath(filePath string) string {
 	return ret
 }
 
-func GetFiles(folder string) []string {
-	files, _ := ioutil.ReadDir(folder)
-	var result []string
-	for _, file := range files {
-		if file.IsDir() {
-			result = append(result)
-
-		} else {
-			fmt.Println(folder + "/" + file.Name())
-		}
-	}
-	return result
-}
-
 func (d Diff) If_Diff_Files(filepath1 string, filepath2 string) bool {
 	sha1_code := sha1_encode.ShaFile(filepath1)
 	sha2_code := (sha1_encode.ShaFile(filepath2))
