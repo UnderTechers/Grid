@@ -23,7 +23,6 @@ func Execute() {
 	cmdPrint.AddCommand(cmdPrint2)
 	rootCmd.AddCommand(cmdPrint)
 	rootCmd.AddCommand(sync)
-	rootCmd.AddCommand(add)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

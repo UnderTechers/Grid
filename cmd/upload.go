@@ -15,6 +15,11 @@ import (
 	"github.com/tidwall/sjson"
 )
 
+func init() {
+	rootCmd.AddCommand(add)
+	rootCmd.AddCommand(rm)
+}
+
 // type submitHistory struct {
 // 	projectName    string   `json:"projectName"`
 // 	branchHashCode string   `json:"branchHashCode"`
@@ -99,6 +104,15 @@ func writeFile(filename string, content string) {
 	if err != nil {
 		log.Print(err)
 	}
+}
+
+var rm = &cobra.Command{
+	Use:   "rm [the filename you want to remove from the submit]",
+	Short: "Remove the files from this submit",
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		// do it later
+	},
 }
 
 var add = &cobra.Command{
@@ -189,29 +203,61 @@ var submit = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var title = args[0]
 		var content = args[1]
-		latest, ifSync, dataJson := getLatestBranchStatus()
+
+		data, err := ioutil.ReadFile("/.grid/config.json") //get info from config.json, which shows the default settings
+		iferr(err)
+		dataJson := string(data)
+		defaultBranch := gjson.Get(dataJson, "branchName").String()
+		username := gjson.Get(dataJson, "username").String()
+		submit_token := gjson.Get(dataJson, "submit_token").String()
+		latestSubmit := gjson.Get(dataJson, "latest").String()
+		ifSync := gjson.Get(dataJson, "ifsync").Bool()
+
 		fmt.Println(title, content, dataJson)
 		if ifSync == false {
 			// error : because you cannot submit multiple times
 			fmt.Println("- Error [101]: you cannot submit multiple times. Please check you have synced before you submit. ")
 			return
 		} else {
-			submitHashCode := sha1_encode.ShaFile("./.grid/tmp/stagingArea.json")
-			stagingArea, err := ioutil.ReadFile("./.grid/tmp/stagingArea.json")
+
+			stagingArea, err := ioutil.ReadFile("./.grid/tmp/stagingArea.json") // read changes
 			if err != nil {
 				log.Fatalln(err)
 			}
 			fileList := GetFiles("./.grid/tmp", "")
+			addition := 0
+			deletion := 0
+			modification := 0
 
-			// for _, v := range fileList {
+			for _, v := range fileList {
+				// iterate all of changes in stagingArea
+				if gjson.Get(string(stagingArea), v).Exists() {
+					// if exists
+					status := gjson.Get(string(stagingArea), v).Get("status").String()
+					if status == "add" {
+						addition += 1
+					}
+					if status == "changed" {
+						modification += 1
+					}
+					if status == "deleted" {
+						deletion += 1
+					}
+				}
+			}
 
-			// 	//if gjson.Get(string(stagingArea),v)
-			// }
-			fmt.Println(submitHashCode, stagingArea, fileList)
+			fmt.Println("(%d) files added, (%d) files changed, (%d) files deleted", addition, modification, deletion)
+			//create a submit
+
+			submitHashCode := sha1_encode.ShaText(string(stagingArea))
+			targetedPath := path.Join(".", ".grid", defaultBranch, submitHashCode)
+			createDir(targetedPath)
+			createDir(targetedPath + "/files")
+
+			//update latest submit
+			sjson.Set(dataJson, "latest", submitHashCode)
+			writeFile("./.grid/config.json", dataJson)
 		}
-
-		//create a submit
-		fmt.Println(latest)
 
 	},
 }
