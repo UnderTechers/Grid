@@ -23,7 +23,7 @@ func main() {
 	// var c server.Compression
 	// c.Compress("hello", "something.7z")
 	//cmd.Execute()
-	fmt.Println(cmd.GetFiles("./.grid/tmp"))
+	fmt.Println((cmd.GetFiles("./.grid/tmp", "")))
 
 	// var r server.Router
 	// r.Host = "0.0.0.0:8000"

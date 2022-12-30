@@ -45,15 +45,15 @@ func iferr(err error) {
 	}
 }
 
-func GetFiles(folder string) []string {
+func GetFiles(folder string, extraDir string) []string {
 
-	files, _ := ioutil.ReadDir(folder)
+	files, _ := ioutil.ReadDir(folder + extraDir)
 	var ret []string
 	for _, file := range files {
 		if file.IsDir() {
-			ret = append(ret, GetFiles(folder+"/"+file.Name())...)
+			ret = append(ret, GetFiles(folder, "/"+extraDir+"/"+file.Name())...)
 		} else {
-			ret = append(ret, (folder + "/" + file.Name()))
+			ret = append(ret, path.Clean((extraDir + "/" + file.Name())))
 		}
 	}
 	return ret
@@ -201,7 +201,12 @@ var submit = &cobra.Command{
 			if err != nil {
 				log.Fatalln(err)
 			}
-			fileList := GetFiles("./.grid/tmp")
+			fileList := GetFiles("./.grid/tmp", "")
+
+			// for _, v := range fileList {
+
+			// 	//if gjson.Get(string(stagingArea),v)
+			// }
 			fmt.Println(submitHashCode, stagingArea, fileList)
 		}
 
