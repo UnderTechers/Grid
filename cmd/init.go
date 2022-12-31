@@ -2,11 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/tidwall/sjson"
 )
 
 var (
@@ -20,10 +19,17 @@ var Init = &cobra.Command{ // for testing cobra
 	Long: `Init will make a ".grid" folder in the root directory of project.
 	 Every operations and changes will be uploaded to .grid folder first, add to submit and sync with server.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		newpath := filepath.Join(".", ".grid")
-		if err := os.MkdirAll(newpath, os.ModePerm); err != nil {
-			log.Fatal(err)
-		}
+		createDir("./.grid")
+		createDir("./.grid/tmp")
+		createFile("./.grid/config.json")
+
+		var source, branchName string
+		fmt.Scanf("Input the source of this project(default=http://grid.gridle.com): %s", source)
+		fmt.Scanf("Input the branchName(default=branch-dev): %s", branchName)
+		config := "{}"
+		sjson.Set(config, "source", source)
+		sjson.Set(config, "branch-name", branchName)
+		writeFile("./.grid/config.json", "{}")
 		fmt.Println("- Initialization finished!")
 		fmt.Println("- Please finish your configuration in ./config.json")
 
