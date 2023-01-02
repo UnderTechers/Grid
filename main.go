@@ -24,7 +24,7 @@ func main() {
 
 	//cmd.Execute()
 	//fmt.Println((cmd.GetFiles("./.grid/tmp", "")))
-	utils.Copy_Folder("./extension_system", "./utils")
+	utils.Copy_Folder("./utils", "./testy")
 	// var r server.Router
 	// r.Host = "0.0.0.0:8000"
 	// r.Init_Server()

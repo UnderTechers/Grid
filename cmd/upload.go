@@ -129,14 +129,7 @@ var add = &cobra.Command{
 			// initialize tmp
 			if ifSync == false { // if this is a new submit
 				sjson.Set(string(dataJson), "ifsync", "true")
-				res, _ := PathExists("./.grid/tmp/")
-				if res { // if exists
-					os.RemoveAll("./.grid/tmp/")
-					CreateDir("./.grid/tmp/")
-				}
 
-				createFile(tmpConfigPath)
-				writeFile(tmpConfigPath, "{}")
 			}
 
 			var targetedFilePath = path.Join(".", ".grid", username, branchName, latest, "files", originalFilePath)
@@ -257,9 +250,12 @@ var submit = &cobra.Command{
 			fmt.Println("- submit has been created! The SHA-1 code is: %s", submitHashCode)
 
 			//copy files
-
+			utils.Copy_Folder("./", targetedPath)
+			utils.Copy_Folder("./.grid/tmp", targetedPath)
+			utils.Cut(targetedPath+"/stagingArea.json", targetedPath+"../stagingArea.json") // cut it to become the stagingArea
+			fmt.Println("- submit committed successfully")
 			// clean tmp folder
-
+			init_tmp()
 		}
 
 	},
