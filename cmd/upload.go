@@ -3,12 +3,11 @@ package cmd
 import (
 	"fmt"
 	"grid/sha1_encode"
+	"grid/utils"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
@@ -36,13 +35,6 @@ type changesInFile struct {
 	hashcode string
 	_type    string
 }
-
-var (
-	hostPrefix = "127.0.0.1:8080/internal"
-	client     = &http.Client{ //config to client by http
-		Timeout: time.Second * 5,
-	}
-)
 
 func iferr(err error) {
 	if err != nil {
@@ -89,7 +81,7 @@ func createFile(filename string) {
 	defer newFile.Close()
 }
 
-func createDir(filename string) {
+func CreateDir(filename string) {
 	os.RemoveAll(filename)
 	newpath := filename
 	err := os.MkdirAll(newpath, os.ModePerm)
@@ -140,7 +132,7 @@ var add = &cobra.Command{
 				res, _ := PathExists("./.grid/tmp/")
 				if res { // if exists
 					os.RemoveAll("./.grid/tmp/")
-					createDir("./.grid/tmp/")
+					CreateDir("./.grid/tmp/")
 				}
 
 				createFile(tmpConfigPath)
@@ -152,17 +144,18 @@ var add = &cobra.Command{
 			_type := "normal"
 			hashcode := sha1_encode.ShaFile(originalFilePath)
 			changes := make(map[string][]int)
-			status := "changed"
+
 			Config, err := ioutil.ReadFile(tmpConfigPath)
 			commitConfig := string(Config)
 			if res, _ := PathExists(targetedFilePath); !res {
-				status = "add"
+				status := "add"
 				content := make(map[string]string)
 				content["hashcode"] = hashcode
 				content["type"] = _type
 				content["status"] = status
 				sjson.Set(commitConfig, originalFilePath, content)
 				writeFile(tmpConfigPath, commitConfig)
+				utils.Copy(originalFilePath, "./.grid/tmp/"+originalFilePath, 128)
 				return
 			}
 			if d.If_Diff_Files(originalFilePath, targetedFilePath) {
@@ -178,12 +171,14 @@ var add = &cobra.Command{
 				changes["addition"] = append(changes["addition"])
 				// check if it exists
 				if fileInfo == "" {
+					status := "changed"
 					content := make(map[string]string)
 					content["hashcode"] = hashcode
 					content["type"] = _type
 					content["status"] = status
 					sjson.Set(commitConfig, originalFilePath, content)
 					writeFile(tmpConfigPath, commitConfig)
+					utils.Copy(originalFilePath, "./.grid/tmp/"+originalFilePath, 128)
 					return
 				}
 			}
@@ -251,14 +246,20 @@ var submit = &cobra.Command{
 
 			submitHashCode := sha1_encode.ShaText(string(stagingArea))
 			targetedPath := path.Join(".", ".grid", defaultBranch, submitHashCode)
-			createDir(targetedPath)
-			createDir(targetedPath + "/files")
+			CreateDir(targetedPath)
+			CreateDir(targetedPath + "/files")
+			createFile(targetedPath + "/files/package.json") // for comparison by nodejs
 
 			//update latest submit
 			sjson.Set(dataJson, "latest", submitHashCode)
 			writeFile("./.grid/config.json", dataJson)
 
 			fmt.Println("- submit has been created! The SHA-1 code is: %s", submitHashCode)
+
+			//copy files
+
+			// clean tmp folder
+
 		}
 
 	},

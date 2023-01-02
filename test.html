@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Make sure to load the highlight.js CSS file before the Diff2Html CSS file -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.1/styles/github.min.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css"
+    />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/diff2html/bundles/js/diff2html-ui.min.js"></script>
+  </head>
+  <script>
+    const diffString = `
+    diff --git a/test1.cpp b/test1.cpp
+index vundefined..vundefined 100644
+--- a/test1.cpp
++++ b/test1.cpp
+@@ -1,7 +1,7 @@
+ #include<bits/stdc++.h>
+ using namespace std;
+ int main(){
+-    cout << "test lineqeqe 1";
++    cout << "test line 1";
+     cout << "test deleted line 2";
+     cout << "test line 3";
+     cout << "test changed line 4";
+diff --git a/test2.cpp b/test2.cpp
+index vundefined..vundefined 100644
+--- a/test2.cpp
++++ b/test2.cpp
+@@ -3,5 +3,5 @@
+ int main(){
+     cout << "test line 1";
+     cout << "test line 3";
+-    cout << "test line 4";
++    cout << "test linesaascasc 4";
+ }
+\ No newline at end of file`;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var targetElement = document.getElementById('myDiffElement');
+      var configuration = {
+        drawFileList: true,
+        fileListToggle: false,
+        fileListStartVisible: false,
+        fileContentToggle: false,
+        matching: 'lines',
+        outputFormat: 'side-by-side',
+        synchronisedScroll: true,
+        highlight: true,
+        renderNothingWhenEmpty: false,
+      };
+      var diff2htmlUi = new Diff2HtmlUI(targetElement, diffString, configuration);
+      diff2htmlUi.draw();
+      diff2htmlUi.highlightCode();
+    });
+  </script>
+  <body>
+    <div id="myDiffElement"></div>
+  </body>
+</html>

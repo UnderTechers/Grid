@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -66,10 +68,36 @@ var _sync = &cobra.Command{
 		iferr(err)
 		ifsync := gjson.Get(string(dataJson), "ifsync").Bool()
 		if ifsync {
-			//upload
+			// upload
+			// auth first
+			projName := gjson.Get(string(dataJson), "projectName").String()
+			userName := gjson.Get(string(dataJson), "username").String()
+			token := gjson.Get(string(dataJson), "token").String()
+			resp, err := client.PostForm(GridlePrefix+"/internal/auth", url.Values{"projName": {projName}, "username": {userName}, "token": {token}})
+			defer resp.Body.Close()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			if gjson.Get(string(body), "res").String() == "res" {
+				// successful
+				fmt.Println("- Auth succeeded!")
+				// start to sync
+			} else {
+				fmt.Println("- Error[103] There is an error occurring when authenticating from server.")
+				return
+			}
+
+			// upload the latest submit
+			//
 
 		} else {
 			//download
+			// the latest submit will be changed into the newest one
+			// stagingArea will be outputed
 		}
 	},
 }

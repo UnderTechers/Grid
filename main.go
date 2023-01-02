@@ -1,7 +1,7 @@
 package main
 
 import (
-	"grid/cmd"
+	"grid/utils"
 	"os"
 )
 
@@ -22,9 +22,9 @@ func main() {
 	// var c server.Compression
 	// c.Compress("hello", "something.7z")
 
-	cmd.Execute()
+	//cmd.Execute()
 	//fmt.Println((cmd.GetFiles("./.grid/tmp", "")))
-
+	utils.Copy_Folder("./extension_system", "./utils")
 	// var r server.Router
 	// r.Host = "0.0.0.0:8000"
 	// r.Init_Server()

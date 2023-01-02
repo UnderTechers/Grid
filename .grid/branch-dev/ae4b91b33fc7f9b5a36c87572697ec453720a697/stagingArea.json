@@ -1,20 +1,17 @@
 {
     "e1029wuu":{
         "name" :"./src/main.go",
-        "type" : "code",
-        "changes" : {
-            "addition":[11,22,34],
-            "deletion":[1,2,3],
-            "modification":[9,10]
-        }
+        "type" : "normal",
+        "status": "add"
     },
     "1uheuhe":{
         "name" : "./src/index.html",
-        "type" : "html",
-        "changes" : {
-            "addition":[11,22,34],
-            "deletion":[1,2,3],
-            "modification":[9,10]
-        }
+        "type" : "normal",
+        "status": "changed"
+    },
+    "1uhe11uhe":{
+        "name" : "./src/test.txt",
+        "type" : "normal",
+        "status": "deleted"
     }
 }

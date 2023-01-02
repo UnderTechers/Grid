@@ -18,6 +18,7 @@ func (c Compression) Compress(path string, filename string) {
 
 func (c Compression) Decompress(filename string, done func()) {
 	defer done()
+
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("cmd.exe", "/c start 7z"+" "+"x"+" "+filename)
 		if err := cmd.Run(); err != nil {
