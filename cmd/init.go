@@ -32,11 +32,18 @@ var Init = &cobra.Command{ // for testing cobra
 		init_tmp()
 
 		var source, branchName string
-		fmt.Scanf("Input the source of this project(default=http://grid.gridle.com): %s", source)
-		fmt.Scanf("Input the branchName(default=branch-dev): %s", branchName)
+		fmt.Printf("Input the source of this project(default=http://grid.gridle.com): ")
+		fmt.Scanf("%s\n", &source)
+		fmt.Printf("Input the branchName(default=branch-dev): ")
+		fmt.Scanf("%s", &branchName)
 		config := "{}"
-		sjson.Set(config, "source", source)
-		sjson.Set(config, "branch-name", branchName)
+		fmt.Println(source, branchName)
+		var err error
+		config, err = sjson.Set(config, "source", source)
+		iferr(err)
+		config, err = sjson.Set(config, "branchName", branchName)
+		iferr(err)
+		fmt.Println(config)
 		writeFile("./.grid/config.json", config)
 		fmt.Println("- Initialization finished!")
 		fmt.Println("- Please finish your configuration in ./config.json")

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -217,11 +218,19 @@ var submit = &cobra.Command{
 			deletion := 0
 			modification := 0
 
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"Name", "Status", "Type"})
+
 			for _, v := range fileList {
 				// iterate all of changes in stagingArea
+
 				if gjson.Get(string(stagingArea), v).Exists() {
 					// if exists
 					status := gjson.Get(string(stagingArea), v).Get("status").String()
+					_type := gjson.Get(string(stagingArea), v).Get("type").String()
+					inline := []string{v, status, _type}
+					table.Append(inline)
+
 					if status == "add" {
 						addition += 1
 					}
@@ -235,6 +244,7 @@ var submit = &cobra.Command{
 			}
 
 			fmt.Println("- (%d) files added, (%d) files changed, (%d) files deleted", addition, modification, deletion)
+			table.Render()
 			//create a submit
 
 			submitHashCode := sha1_encode.ShaText(string(stagingArea))
@@ -251,9 +261,9 @@ var submit = &cobra.Command{
 
 			//copy files
 			utils.Copy_Folder("./", targetedPath)
-			utils.Copy_Folder("./.grid/tmp", targetedPath)
-			utils.Cut(targetedPath+"/stagingArea.json", targetedPath+"../stagingArea.json") // cut it to become the stagingArea
-			fmt.Println("- submit committed successfully")
+			utils.Copy_Folder("./.grid/tmp", targetedPath+"/files")
+			utils.Cut(targetedPath+"/files/stagingArea.json", targetedPath+"stagingArea.json") // cut it to become the stagingArea
+			fmt.Println("- submit conducted successfully")
 			// clean tmp folder
 			init_tmp()
 		}
