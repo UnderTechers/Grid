@@ -59,12 +59,13 @@ func GetFiles(folder string, extraDir string) []string {
 }
 
 func getLatestBranchStatus() (string, bool, string) {
-	dataJson, err := ioutil.ReadFile("/.grid/config.json")
+	_dataJson, err := ioutil.ReadFile("/.grid/config.json")
+	dataJson := string(_dataJson)
 	iferr(err)
-	latest := gjson.Get(string(dataJson), "latest").String()
-	ifSync := gjson.Get(string(dataJson), "ifsync").Bool()
+	latest := gjson.Get(dataJson, "latest").String()
+	ifSync := gjson.Get(dataJson, "ifsync").Bool()
 
-	return latest, ifSync, string(dataJson)
+	return latest, ifSync, dataJson
 }
 
 func compare2Files(file1 string, file2 string) bool { // true means different and vice versa
@@ -120,16 +121,17 @@ var add = &cobra.Command{
 
 		} else {
 			var originalFilePath = filename
-			dataJson, err := ioutil.ReadFile("/.grid/config.json")
+			_dataJson, err := ioutil.ReadFile("/.grid/config.json")
 			iferr(err)
-			latest := gjson.Get(string(dataJson), "latest").String()
-			ifSync := gjson.Get(string(dataJson), "ifsync").Bool()
-			username := gjson.Get(string(dataJson), "username").String()
-			branchName := gjson.Get(string(dataJson), "banrchName").String()
+			dataJson := string(_dataJson)
+			latest := gjson.Get(dataJson, "latest").String()
+			ifSync := gjson.Get(dataJson, "ifsync").Bool()
+			username := gjson.Get(dataJson, "username").String()
+			branchName := gjson.Get(dataJson, "banrchName").String()
 			tmpConfigPath := "./.grid/tmp/stagingArea.json"
 			// initialize tmp
 			if ifSync == false { // if this is a new submit
-				sjson.Set(string(dataJson), "ifsync", "true")
+				dataJson, _ = sjson.Set(dataJson, "ifsync", "true")
 
 			}
 
@@ -147,7 +149,7 @@ var add = &cobra.Command{
 				content["hashcode"] = hashcode
 				content["type"] = _type
 				content["status"] = status
-				sjson.Set(commitConfig, originalFilePath, content)
+				commitConfig, _ = sjson.Set(commitConfig, originalFilePath, content)
 				writeFile(tmpConfigPath, commitConfig)
 				utils.Copy(originalFilePath, "./.grid/tmp/"+originalFilePath, 128)
 				return
@@ -170,7 +172,7 @@ var add = &cobra.Command{
 					content["hashcode"] = hashcode
 					content["type"] = _type
 					content["status"] = status
-					sjson.Set(commitConfig, originalFilePath, content)
+					commitConfig, _ = sjson.Set(commitConfig, originalFilePath, content)
 					writeFile(tmpConfigPath, commitConfig)
 					utils.Copy(originalFilePath, "./.grid/tmp/"+originalFilePath, 128)
 					return
@@ -254,7 +256,7 @@ var submit = &cobra.Command{
 			createFile(targetedPath + "/files/package.json") // for comparison by nodejs
 
 			//update latest submit
-			sjson.Set(dataJson, "latest", submitHashCode)
+			dataJson, _ = sjson.Set(dataJson, "latest", submitHashCode)
 			writeFile("./.grid/config.json", dataJson)
 
 			fmt.Println("- submit has been created! The SHA-1 code is: %s", submitHashCode)
