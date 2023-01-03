@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
@@ -35,6 +34,11 @@ func DownloadFile(link string) {
 	u, err := url.Parse(link)
 	iferr(err)
 
+	// source := u.Host
+	// _dataJson, _ := ioutil.ReadFile("./.grid/config.json")
+	// dataJson, _ := sjson.Set(string(_dataJson), "source", source)
+	// writeFile("./.grid/config.json", dataJson)
+
 	dirNameSeq := strings.Split(u.Path, "/")
 	dirName := dirNameSeq[len(dirNameSeq)-1]
 	fmt.Println(dirName)
@@ -55,10 +59,8 @@ func DownloadFile(link string) {
 	io.Copy(io.MultiWriter(f, bar), resp.Body)
 
 	var c server.Compression
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go c.Decompress("./"+dirName+".7z", wg.Done)
-	wg.Wait()
+
+	c.Decompress("./" + dirName + ".7z")
 
 	err = os.Rename("./files", "./"+dirName)
 	iferr(err)

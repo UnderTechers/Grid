@@ -70,7 +70,7 @@ func (s *Router) Init_Server() {
 }
 
 func (s Router) Routes() {
-	s.r.POST("/proj/:username/:projectname", s.Download)
+	s.r.POST("/:username/:projectname", s.Download)
 	s.r.POST("/sync", func(c *gin.Context) {
 		// username, token(for authorize)
 		// upload the 7z of project and then unzip it here

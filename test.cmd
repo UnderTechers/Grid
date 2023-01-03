@@ -1,0 +1,1 @@
+7z x ./gridle.7z
