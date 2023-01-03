@@ -22,7 +22,7 @@ var branch = &cobra.Command{
 		config, _ := ioutil.ReadFile("./.grid/config.json")
 		_config, err := sjson.Set(string(config), "branchName", branchName)
 		iferr(err)
-		_config, err = sjson.Set(string(config), "ifSync", true)
+		_config, err = sjson.Set(_config, "ifSync", true)
 		iferr(err)
 		writeFile("./.grid/config.json", _config)
 
