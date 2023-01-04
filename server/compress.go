@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"runtime"
 )
 
@@ -35,10 +36,13 @@ func (c Compression) Decompress(filename string) {
 		if err := cmd.Run(); err != nil {
 			log.Fatalln(err.Error())
 		}
+		os.Rename("./files", "./"+path.Base(filename))
+
 	} else {
 		cmd := exec.Command("7z", "x", filename)
 		if err := cmd.Run(); err != nil {
 			log.Fatalln(err.Error())
 		}
+		os.Rename("./files", "./"+path.Base(filename))
 	}
 }

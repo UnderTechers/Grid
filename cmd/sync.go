@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"net/url"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/schollz/progressbar/v3"
@@ -58,7 +57,7 @@ func downloadExample() {
 
 var _sync = &cobra.Command{
 	Use:   "sync",
-	Short: "sync will make your submits synchronize with the server",
+	Short: "Sync will make your submits synchronize with the server",
 
 	Long: "If you want to synchrnoize the server because of new changes there, you can use sync. If you want to submit your changes, you can use sync.",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -66,38 +65,56 @@ var _sync = &cobra.Command{
 		fmt.Println("- detecting conflicts...")
 		dataJson, err := ioutil.ReadFile("/.grid/config.json")
 		iferr(err)
-		ifsync := gjson.Get(string(dataJson), "ifsync").Bool()
-		if ifsync {
-			// upload
-			// auth first
-			projName := gjson.Get(string(dataJson), "projectName").String()
-			userName := gjson.Get(string(dataJson), "username").String()
-			token := gjson.Get(string(dataJson), "token").String()
-			resp, err := client.PostForm(GridlePrefix+"/internal/auth", url.Values{"projName": {projName}, "username": {userName}, "token": {token}})
-			defer resp.Body.Close()
-			if err != nil {
-				log.Fatalln(err)
-			}
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			if gjson.Get(string(body), "res").String() == "res" {
-				// successful
-				fmt.Println("- Auth succeeded!")
-				// start to sync
-			} else {
-				fmt.Println("- Error[103] There is an error occurring when authenticating from server.")
-				return
-			}
-
-			// upload the latest submit
-			//
-
-		} else {
-			//download
-			// the latest submit will be changed into the newest one
-			// stagingArea will be outputed
+		projName := gjson.Get(string(dataJson), "projectName").String()
+		userName := gjson.Get(string(dataJson), "username").String()
+		token := gjson.Get(string(dataJson), "token").String()
+		latest := gjson.Get(string(dataJson), "latest").String()
+		branchName := gjson.Get(string(dataJson), "branchName").String()
+		com := exec.Command("7z", "a", "sync.7z", "./.grid/"+branchName+"/"+latest)
+		if err := com.Run(); err != nil {
+			fmt.Println("- Error[104] Some unknown errors occurred.")
+			return
 		}
+
+		postFile2("http://127.0.0.1:8000/sync", "test.7z", "test.test.com", token, userName, projName, branchName)
+
+		// fmt.Println("- detecting conflicts...")
+		// dataJson, err := ioutil.ReadFile("/.grid/config.json")
+		// iferr(err)
+		// ifsync := gjson.Get(string(dataJson), "ifsync").Bool()
+		// if ifsync {
+		// 	// upload
+		// 	// auth first
+		// 	projName := gjson.Get(string(dataJson), "projectName").String()
+		// 	userName := gjson.Get(string(dataJson), "username").String()
+		// 	token := gjson.Get(string(dataJson), "token").String()
+		// 	source := gjson.Get(string(dataJson), "source").String()
+		// 	resp, err := client.PostForm(source+"/sync", url.Values{"projName": {projName}, "username": {userName}, "token": {token}})
+		// 	defer resp.Body.Close()
+		// 	if err != nil {
+		// 		log.Fatalln(err)
+		// 	}
+		// 	body, err := ioutil.ReadAll(resp.Body)
+		// 	if err != nil {
+		// 		log.Fatalln(err)
+		// 	}
+
+		// 	if gjson.Get(string(body), "res").String() == "res" {
+		// 		// successful
+		// 		fmt.Println("- Auth succeeded!")
+		// 		// start to sync
+		// 	} else {
+		// 		fmt.Println("- Error[103] There is an error occurring when authenticating from server.")
+		// 		return
+		// 	}
+
+		// 	// upload the latest submit
+		// 	//
+
+		// } else {
+		// 	//download
+		// 	// the latest submit will be changed into the newest one
+		// 	// stagingArea will be outputed
+		// }
 	},
 }
