@@ -2,9 +2,8 @@
     "./src/index.html":{
         "hashcode":"",
         "type" : "html",
-        "status": "add",
- 
-    },
+        "status": "add"
+},
     "title":"",
     "description":""
 }

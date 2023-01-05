@@ -133,8 +133,8 @@ var add = &cobra.Command{
 			tmpConfigPath := "./.grid/tmp/stagingArea.json"
 			// initialize tmp
 			if ifSync == false { // if this is a new submit
-				dataJson, _ = sjson.Set(dataJson, "ifsync", "true")
-
+				dataJson, _ = sjson.Set(dataJson, "ifsync", true)
+				defer writeFile("./.grid/config.json", dataJson)
 			}
 
 			var targetedFilePath = path.Join(".", ".grid", branchName, latest, "files", originalFilePath)
@@ -156,7 +156,7 @@ var add = &cobra.Command{
 				content["status"] = status
 
 				commitConfig, _ = sjson.Set(commitConfig, deal(originalFilePath), content)
-				writeFile(tmpConfigPath, commitConfig)
+				defer writeFile(tmpConfigPath, commitConfig)
 				utils.Copy_Folder(originalFilePath, "./.grid/tmp/"+originalFilePath)
 				return
 			}
@@ -179,7 +179,7 @@ var add = &cobra.Command{
 					content["type"] = _type
 					content["status"] = status
 					commitConfig, _ = sjson.Set(commitConfig, deal(originalFilePath), content)
-					writeFile(tmpConfigPath, commitConfig)
+					defer writeFile(tmpConfigPath, commitConfig)
 					utils.Copy_Folder(originalFilePath, "./.grid/tmp/"+originalFilePath)
 					return
 				}
@@ -212,12 +212,14 @@ var submit = &cobra.Command{
 		// latestSubmit := gjson.Get(dataJson, "latest").String()
 		ifSync := gjson.Get(dataJson, "ifsync").Bool()
 
-		fmt.Println(title, content, dataJson)
+		//fmt.Println(title, content, dataJson)
 		if ifSync == false {
 			// error : because you cannot submit multiple times
 			fmt.Println("- Error [101]: you cannot submit multiple times. Please check you have synced before you submit. ")
 			return
 		} else {
+			dataJson, _ = sjson.Set(dataJson, "ifsync", false)
+			writeFile("./.grid/config.json", dataJson)
 
 			stagingArea, err := ioutil.ReadFile("./.grid/tmp/stagingArea.json") // read changes
 			if err != nil {
@@ -233,11 +235,14 @@ var submit = &cobra.Command{
 
 			for _, v := range fileList {
 				// iterate all of changes in stagingArea
-
-				if gjson.Get(string(stagingArea), v).Exists() {
+				base := deal(path.Base(v))
+				//fmt.Println(string(stagingArea))
+				fmt.Println(gjson.Get(string(stagingArea), base).Get("status"))
+				if gjson.Get(string(stagingArea), base).Exists() {
 					// if exists
-					status := gjson.Get(string(stagingArea), v).Get("status").String()
-					_type := gjson.Get(string(stagingArea), v).Get("type").String()
+					fmt.Println(1)
+					status := gjson.Get(string(stagingArea), base).Get("status").String()
+					_type := gjson.Get(string(stagingArea), base).Get("type").String()
 					inline := []string{v, status, _type}
 					table.Append(inline)
 
@@ -253,12 +258,14 @@ var submit = &cobra.Command{
 				}
 			}
 
-			fmt.Println("- (%d) files added, (%d) files changed, (%d) files deleted", addition, modification, deletion)
+			fmt.Printf("- (%d) files added, (%d) files changed, (%d) files deleted\n", addition, modification, deletion)
 			table.Render()
 			//create a submit
-
 			submitHashCode := sha1_encode.ShaText(string(stagingArea))
 			targetedPath := path.Join(".", ".grid", defaultBranch, submitHashCode)
+
+			//fmt.Println(defaultBranch, targetedPath)
+
 			CreateDir(targetedPath)
 			CreateDir(targetedPath + "/files")
 			createFile(targetedPath + "/files/package.json") // for comparison by nodejs
@@ -267,12 +274,25 @@ var submit = &cobra.Command{
 			dataJson, _ = sjson.Set(dataJson, "latest", submitHashCode)
 			writeFile("./.grid/config.json", dataJson)
 
-			fmt.Println("- submit has been created! The SHA-1 code is: %s", submitHashCode)
+			fmt.Println("- submit has been created! The SHA-1 code is: ", submitHashCode)
 
 			//copy files
-			utils.Copy_Folder("./", targetedPath)
-			utils.Copy_Folder("./.grid/tmp", targetedPath+"/files")
-			utils.Cut(targetedPath+"/files/stagingArea.json", targetedPath+"stagingArea.json") // cut it to become the stagingArea
+			utils.Copy_Folder("./", "../caches/")
+			utils.Copy_Folder("./../caches/", targetedPath+"/files/")
+			utils.Copy_Folder("./.grid/tmp", targetedPath+"/files/")
+
+			utils.Cut(targetedPath+"/files/stagingArea.json", targetedPath+"/stagingArea.json") // cut it to become the stagingArea
+
+			//update title and descriptions
+			newStaging, _ := ioutil.ReadFile(targetedPath + "stagingArea.json")
+			newStaging_, _ := sjson.Set(string(newStaging), "title", title)
+			newStaging_, _ = sjson.Set(newStaging_, "desciption", content)
+			writeFile(targetedPath+"stagingArea.json", newStaging_)
+
+			//update latest
+			_dataJson, _ := ioutil.ReadFile("./.grid/config.json")
+			dataJson, _ := sjson.Set(string(_dataJson), "latest", submitHashCode)
+			writeFile("./.grid/config.json", dataJson)
 			fmt.Println("- submit conducted successfully")
 			// clean tmp folder
 			init_tmp()
@@ -280,4 +300,9 @@ var submit = &cobra.Command{
 		}
 
 	},
+}
+
+var history = &cobra.Command{
+	Use: "history",
+	// to-do: to print the table of current submit of changes
 }

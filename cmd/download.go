@@ -62,7 +62,4 @@ func DownloadFile(link string) {
 
 	c.Decompress("./" + dirName + ".7z")
 
-	err = os.Rename("./files", "./"+dirName)
-	iferr(err)
-
 }

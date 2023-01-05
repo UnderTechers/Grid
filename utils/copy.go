@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"strings"
 
 	"io"
 	"io/ioutil"
@@ -20,6 +21,17 @@ func CreateDir(filename string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func PathExists(path string) (bool, error) { //used to determine whether file/path exists
+	_, err := os.Stat(path)
+	if err == nil { // if found, return true
+		return true, nil
+	}
+	if os.IsNotExist(err) { //if not found, return false
+		return false, nil
+	}
+	return false, err
 }
 
 func Copy(src, dst string, BUFFERSIZE int64) error {
@@ -79,15 +91,22 @@ func Copy_Folder(from, to string) error {
 	if e != nil {
 		return e
 	}
-
+	from = strings.ReplaceAll(from, "\\", "/")
+	_from := path.Base(from)
+	// strlist := strings.Split(from, "\\")
+	// _from := strlist[len(strlist)-1]
+	//fmt.Println(_from)
 	//to-do : ignore command
-	if path.Base("to") == ".gridConfig" || path.Base("to") == "package.json" { //ignore
+	//fmt.Println(_from, from)
+	if _from == ".gridConfig" || _from == "package.json" { //ignore
 		return nil
 	}
 	if f.IsDir() {
 
 		//from是文件夹，那么定义to也是文件夹
-		CreateDir(to)
+		if res, _ := PathExists(to); !res {
+			CreateDir(to)
+		}
 		if list, e := ioutil.ReadDir(from); e == nil {
 
 			for _, item := range list {
@@ -104,15 +123,16 @@ func Copy_Folder(from, to string) error {
 	} else {
 
 		//from是文件，那么创建to的文件夹
+		if res, _ := PathExists(to); !res {
+			p := filepath.Dir(to)
 
-		p := filepath.Dir(to)
+			if _, e = os.Stat(p); e != nil {
 
-		if _, e = os.Stat(p); e != nil {
+				if e = os.MkdirAll(p, 0777); e != nil {
+					return e
+				}
 
-			if e = os.MkdirAll(p, 0777); e != nil {
-				return e
 			}
-
 		}
 		//读取源文件
 

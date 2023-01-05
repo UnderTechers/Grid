@@ -23,6 +23,7 @@ func main() {
 	// c.Compress("hello", "something.7z")
 
 	cmd.Execute()
+	//utils.Copy_Folder("./", "./upload")
 	//fmt.Println((cmd.GetFiles("./.grid/tmp", "")))
 	//utils.Copy_Folder("./utils", "./testy")
 	// var r server.Router
