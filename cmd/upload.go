@@ -155,7 +155,7 @@ var add = &cobra.Command{
 				content["type"] = _type
 				content["status"] = status
 
-				commitConfig, _ = sjson.Set(commitConfig, originalFilePath, content)
+				commitConfig, _ = sjson.Set(commitConfig, deal(originalFilePath), content)
 				writeFile(tmpConfigPath, commitConfig)
 				utils.Copy(originalFilePath, "./.grid/tmp/"+originalFilePath, 128)
 				return
@@ -178,7 +178,7 @@ var add = &cobra.Command{
 					content["hashcode"] = hashcode
 					content["type"] = _type
 					content["status"] = status
-					commitConfig, _ = sjson.Set(commitConfig, originalFilePath, content)
+					commitConfig, _ = sjson.Set(commitConfig, deal(originalFilePath), content)
 					writeFile(tmpConfigPath, commitConfig)
 					utils.Copy(originalFilePath, "./.grid/tmp/"+originalFilePath, 128)
 					return
