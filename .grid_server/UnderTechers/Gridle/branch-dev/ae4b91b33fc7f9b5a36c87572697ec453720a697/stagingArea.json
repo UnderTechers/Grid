@@ -3,11 +3,7 @@
         "hashcode":"",
         "type" : "html",
         "status": "add",
-        "changes" : {
-            "addition":[11,22,34],
-            "deletion":[1,2,3],
-            "modification":[9,10]
-        }
+ 
     },
     "title":"",
     "description":""

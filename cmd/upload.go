@@ -157,7 +157,7 @@ var add = &cobra.Command{
 
 				commitConfig, _ = sjson.Set(commitConfig, deal(originalFilePath), content)
 				writeFile(tmpConfigPath, commitConfig)
-				utils.Copy(originalFilePath, "./.grid/tmp/"+originalFilePath, 128)
+				utils.Copy_Folder(originalFilePath, "./.grid/tmp/"+originalFilePath)
 				return
 			}
 			if d.If_Diff_Files(originalFilePath, targetedFilePath) {
@@ -180,7 +180,7 @@ var add = &cobra.Command{
 					content["status"] = status
 					commitConfig, _ = sjson.Set(commitConfig, deal(originalFilePath), content)
 					writeFile(tmpConfigPath, commitConfig)
-					utils.Copy(originalFilePath, "./.grid/tmp/"+originalFilePath, 128)
+					utils.Copy_Folder(originalFilePath, "./.grid/tmp/"+originalFilePath)
 					return
 				}
 			} else {
