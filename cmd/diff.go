@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"grid/sha1_encode"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 
@@ -84,33 +84,9 @@ func strip(str string) string {
 
 func (d Diff) Show_Changes(preCodePath string, postCodePath string) {
 	// show the changes line by line
-	preCode, err := os.Open(preCodePath)
-	iferr(err)
-	postCode, err := os.Open(postCodePath)
-	iferr(err)
-	defer preCode.Close()
-	defer postCode.Close()
-
-	scanner1 := bufio.NewScanner(preCode)
-	scanner2 := bufio.NewScanner(postCode)
-
-	for scanner1.Scan() && scanner2.Scan() {
-		line1 := strip(scanner1.Text())
-		line2 := strip(scanner2.Text())
-		if line1 == "" && line2 != "" {
-			// new
-		}
-		if line1 != "" && line2 == "" {
-			//delete
-		}
-		if line1 == line2 {
-			continue
-		}
-
-		if line1 != line2 {
-			//changed
-		}
-
+	cmd := exec.Command("npm", "diff", "--diff="+preCodePath, "--diff="+postCodePath)
+	if err := cmd.Run(); err != nil {
+		fmt.Println("- Error [400] Some unknown errors occurred.")
 	}
 
 }

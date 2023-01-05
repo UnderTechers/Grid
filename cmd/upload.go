@@ -17,6 +17,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(add)
+	rootCmd.AddCommand(submit)
 	rootCmd.AddCommand(rm)
 }
 
@@ -121,13 +122,14 @@ var add = &cobra.Command{
 
 		} else {
 			var originalFilePath = filename
-			_dataJson, err := ioutil.ReadFile("/.grid/config.json")
+			_dataJson, err := ioutil.ReadFile("./.grid/config.json")
 			iferr(err)
 			dataJson := string(_dataJson)
 			latest := gjson.Get(dataJson, "latest").String()
+
 			ifSync := gjson.Get(dataJson, "ifsync").Bool()
-			username := gjson.Get(dataJson, "username").String()
-			branchName := gjson.Get(dataJson, "banrchName").String()
+			//username := gjson.Get(dataJson, "username").String()
+			branchName := gjson.Get(dataJson, "branchName").String()
 			tmpConfigPath := "./.grid/tmp/stagingArea.json"
 			// initialize tmp
 			if ifSync == false { // if this is a new submit
@@ -135,20 +137,24 @@ var add = &cobra.Command{
 
 			}
 
-			var targetedFilePath = path.Join(".", ".grid", username, branchName, latest, "files", originalFilePath)
+			var targetedFilePath = path.Join(".", ".grid", branchName, latest, "files", originalFilePath)
 			var d Diff
 			_type := "normal"
 			hashcode := sha1_encode.ShaFile(originalFilePath)
-			changes := make(map[string][]int)
+			//changes := make(map[string][]int)
 
 			Config, err := ioutil.ReadFile(tmpConfigPath)
 			commitConfig := string(Config)
+
+			fmt.Println(originalFilePath, targetedFilePath)
+
 			if res, _ := PathExists(targetedFilePath); !res {
 				status := "add"
 				content := make(map[string]string)
 				content["hashcode"] = hashcode
 				content["type"] = _type
 				content["status"] = status
+
 				commitConfig, _ = sjson.Set(commitConfig, originalFilePath, content)
 				writeFile(tmpConfigPath, commitConfig)
 				utils.Copy(originalFilePath, "./.grid/tmp/"+originalFilePath, 128)
@@ -164,7 +170,7 @@ var add = &cobra.Command{
 				}
 				fileInfo := value.String() //json result
 
-				changes["addition"] = append(changes["addition"])
+				//changes["addition"] = append(changes["addition"])
 				// check if it exists
 				if fileInfo == "" {
 					status := "changed"
@@ -177,6 +183,8 @@ var add = &cobra.Command{
 					utils.Copy(originalFilePath, "./.grid/tmp/"+originalFilePath, 128)
 					return
 				}
+			} else {
+				fmt.Println("- Nothing different.")
 			}
 
 			//write back
@@ -195,7 +203,7 @@ var submit = &cobra.Command{
 		var title = args[0]
 		var content = args[1]
 
-		data, err := ioutil.ReadFile("/.grid/config.json") //get info from config.json, which shows the default settings
+		data, err := ioutil.ReadFile("./.grid/config.json") //get info from config.json, which shows the default settings
 		iferr(err)
 		dataJson := string(data)
 		defaultBranch := gjson.Get(dataJson, "branchName").String()
@@ -268,6 +276,7 @@ var submit = &cobra.Command{
 			fmt.Println("- submit conducted successfully")
 			// clean tmp folder
 			init_tmp()
+
 		}
 
 	},

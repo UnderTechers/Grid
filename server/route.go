@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"time"
@@ -36,6 +37,24 @@ func iferr(err error) { //grammar sugar for error detection
 	if err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func sync_download(c gin.Context) {
+	//read latest
+	dataJson, err := ioutil.ReadFile("./.grid/config.json")
+	iferr(err)
+	// session := c.Request.Header.Get("session")
+	userName := c.Request.Header.Get("userName")
+	projName := c.Request.Header.Get("projName")
+	branchName := c.Request.Header.Get("branchName")
+	latest := gjson.Get(string(dataJson), "latest").String()
+	com := exec.Command("7z", "a", "./.grid_server/cache/"+latest+".7z", path.Join(".", ".grid_server", userName, projName, branchName, latest))
+	if err := com.Run(); err != nil {
+		fmt.Println("- Error[104] Some unknown errors occurred.")
+		return
+	}
+	//packed 7z
+	//return that
 }
 
 func sync(c *gin.Context) { //POST

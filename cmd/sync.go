@@ -63,20 +63,23 @@ var _sync = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("- sync starts!")
 		fmt.Println("- detecting conflicts...")
-		dataJson, err := ioutil.ReadFile("/.grid/config.json")
+		dataJson, err := ioutil.ReadFile("./.grid/config.json")
 		iferr(err)
+		fmt.Println(string(dataJson))
 		projName := gjson.Get(string(dataJson), "projectName").String()
 		userName := gjson.Get(string(dataJson), "username").String()
 		token := gjson.Get(string(dataJson), "token").String()
 		latest := gjson.Get(string(dataJson), "latest").String()
 		branchName := gjson.Get(string(dataJson), "branchName").String()
-		com := exec.Command("7z", "a", "sync.7z", "./.grid/"+branchName+"/"+latest)
+		CreateDir("./.grid/cache")
+		com := exec.Command("7z", "a", "./.grid/cache/"+latest+".7z", "./.grid/"+branchName+"/"+latest)
+		fmt.Println("7z", "a", "./.grid/cache/"+latest+".7z", "./.grid/"+branchName+"/"+latest)
 		if err := com.Run(); err != nil {
-			fmt.Println("- Error[104] Some unknown errors occurred.")
+			fmt.Println("- Error[104] Some unknown errors occurred.", err)
 			return
 		}
 
-		postFile2("http://127.0.0.1:8000/sync", "test.7z", "test.test.com", token, userName, projName, branchName)
+		postFile2("http://127.0.0.1:8000/sync", "./.grid/cache/"+latest+".7z", "test.test.com", token, userName, projName, branchName)
 
 		// fmt.Println("- detecting conflicts...")
 		// dataJson, err := ioutil.ReadFile("/.grid/config.json")
