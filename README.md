@@ -120,33 +120,6 @@ $ grid submit history 1213 #This is used to see the exact detail of selected sub
 $ grid sync release #it will automatically update "release" folder into the release of this version
 ```
 
-### Grid history
-
-```bash
-$ grid version history
-+-------------------------------------+
-| version number | submits |    date   |
-| 1.0.1          | #1001   | 2022-01-01|
-+-------------------------------------+
-```
-
-/mother
-
-./src
-
-main.py
-
-banner.png
-
-/submit1 
-
-index.html +
-
-/submit2
-
-index.html *
-
-banner.png - 
 
 ### Hash Used in Grid
 
